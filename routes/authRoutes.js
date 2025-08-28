@@ -1,16 +1,24 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { register, login, protect } = require('../controllers/authController');
+const {
+  register,
+  login,
+  protect,
+  currentUser,
+} = require("../controllers/authController");
 
 // Register new user
-router.post('/register', register);
+router.post("/register", register);
 
 // Login user
-router.post('/login', login);
+router.post("/login", login);
+router.get("/user", currentUser);
 
 // Example protected route
-router.get('/protected', protect, (req, res) => {
-  res.json({ message: `Welcome user ${req.user.id}, this is a protected route.` });
+router.get("/protected", protect, (req, res) => {
+  res.json({
+    message: `Welcome user ${req.user.id}, this is a protected route.`,
+  });
 });
 
 module.exports = router;

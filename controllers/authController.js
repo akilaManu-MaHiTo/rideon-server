@@ -3,37 +3,27 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { email, password, mobile } = req.body;
 
   try {
-    // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists)
       return res.status(400).json({ message: "User already exists" });
-
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create user
     const user = new User({
-      username,
       email,
       password: hashedPassword,
+      mobile,
     });
 
     await user.save();
-
-    // Create token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "24h",
-    });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     res.status(201).json({
       token,
       user: {
         id: user._id,
-        username: user.username,
         email: user.email,
       },
     });
@@ -46,39 +36,63 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find user
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
-
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    // Create token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     res.json({
-      token
+      token,
     });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Middleware to protect routes
 exports.protect = (req, res, next) => {
-  const token = req.header("Authorization")?.split(" ")[1]; // Expect Bearer token
+  const token = req.header("Authorization")?.split(" ")[1];
 
   if (!token)
     return res.status(401).json({ message: "No token, authorization denied" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // {id: user._id}
+    req.user = decoded;
     next();
+  } catch (err) {
+    res.status(401).json({ message: "Token is not valid" });
+  }
+};
+
+//verify current user
+exports.currentUser = async (req, res) => {
+  const authHeader = req.header("Authorization");
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id || decoded.userId;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Token is not valid" });
+    }
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user); // send user details as response
   } catch (err) {
     res.status(401).json({ message: "Token is not valid" });
   }
