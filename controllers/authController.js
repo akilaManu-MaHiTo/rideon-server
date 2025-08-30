@@ -7,8 +7,10 @@ exports.register = async (req, res) => {
 
   try {
     const userExists = await User.findOne({ email });
-    if (userExists)
+    if (userExists) {
+      console.log("User already exists");
       return res.status(400).json({ message: "User already exists" });
+    }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const user = new User({
@@ -28,6 +30,7 @@ exports.register = async (req, res) => {
       },
     });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -95,5 +98,13 @@ exports.currentUser = async (req, res) => {
     res.json(user); // send user details as response
   } catch (err) {
     res.status(401).json({ message: "Token is not valid" });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    res.json({ message: "Logout success" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };

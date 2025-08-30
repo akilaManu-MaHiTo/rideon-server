@@ -5,6 +5,7 @@ const {
   login,
   protect,
   currentUser,
+  logout,
 } = require("../controllers/authController");
 
 // Register new user
@@ -21,4 +22,5 @@ router.get("/protected", protect, (req, res) => {
   });
 });
 
+router.post("/logout", logout, protect);
 module.exports = router;
