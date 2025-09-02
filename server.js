@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
+const checkoutRoutes = require("./routes/checkoutRoutes");
 const cors = require("cors");
 
 const app = express();
@@ -16,7 +17,7 @@ app.use(cors({
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
-
+app.use("/api/chekout", checkoutRoutes);
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
 });
