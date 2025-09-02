@@ -21,7 +21,7 @@ exports.notifyPayment = async (req, res) => {
   try {
     const paymentData = req.body;
 
-    const MERCHANT_SECRET = process.env.PAYHERE_SECRET || 'MzE1ODUyNDczMDI5NTU2NjU1MTMzMzk3MjIwMDUyMTAxNTk5ODYyMw==';
+    const MERCHANT_SECRET = process.env.PAYHERE_SECRET;
 
     if (!verifyMd5Sig(paymentData, MERCHANT_SECRET)) {
       console.log('MD5 signature mismatch!');
