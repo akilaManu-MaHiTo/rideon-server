@@ -3,8 +3,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
-const cors = require("cors");
+const bikeStationRoutes = require("./routes/bikeStationRoutes");
 
+const cors = require("cors");
 const app = express();
 
 app.use(express.json());
@@ -14,9 +15,12 @@ app.use(cors({
     methods: ["POST", "GET", "PUT", "DELETE"],
     credentials: true
 }));
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/bike-station", bikeStationRoutes);
+
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
 });
