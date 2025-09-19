@@ -29,7 +29,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/bike-station", bikeStationRoutes);
 app.use("/api/bike", bikeRoutes);
 app.use('/api', paymentRoutes);
-app.use('/api/packages', packageRoutes);
+app.use('/api/package', packageRoutes);
 
 
 app.get('/', (req, res) => {

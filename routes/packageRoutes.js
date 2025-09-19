@@ -5,7 +5,7 @@ const packageController = require('../controllers/packageController');
 const protect = require("../middleware/authMiddleware");
 
 // Create a new package (Admin only)
-router.post('/add', protect, packageController.createPackage);
+router.post('/', protect, packageController.createPackage);
 
 // Get all packages (Admin and User)
 router.get('/', protect, packageController.getAllPackages);
