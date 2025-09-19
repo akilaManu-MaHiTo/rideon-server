@@ -5,7 +5,9 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const bikeStationRoutes = require("./routes/bikeStationRoutes");
+const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+
 
 const cors = require("cors");
 const app = express();
@@ -25,6 +27,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/bike-station", bikeStationRoutes);
 app.use('/api', paymentRoutes);
+app.use('/api/packages', packageRoutes);
+
 
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
