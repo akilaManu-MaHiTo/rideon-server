@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const bikeStationRoutes = require("./routes/bikeStationRoutes");
+const bikeRoutes = require("./routes/bikeRoutes");
 const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
@@ -26,6 +27,7 @@ app.use(bodyParser.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/bike-station", bikeStationRoutes);
+app.use("/api/bike", bikeRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api/packages', packageRoutes);
 
