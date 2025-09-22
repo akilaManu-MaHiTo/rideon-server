@@ -8,7 +8,7 @@ const bikeStationRoutes = require("./routes/bikeStationRoutes");
 const bikeRoutes = require("./routes/bikeRoutes");
 const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
-
+const IncidentRoutes = require('./routes/incidentRoutes');
 
 const cors = require("cors");
 const app = express();
@@ -30,7 +30,7 @@ app.use("/api/bike-station", bikeStationRoutes);
 app.use("/api/bike", bikeRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api/packages', packageRoutes);
-
+app.use('/api/incident', IncidentRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
