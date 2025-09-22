@@ -29,3 +29,16 @@ exports.getAllIncident = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getUserIncidents = async (req, res) => {
+  try {
+    const incidents = await Incident.find({ user: req.user.id })
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(incidents);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
