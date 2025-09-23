@@ -6,7 +6,7 @@ const incidentSchema = new mongoose.Schema(
     howSerious: { type: String, required: true },
     description: { type: String, required: true },
     date: { type: Date, required: true },
-    time: { type: Date, required: true },
+    time: { type: String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
   },
   { timestamps: true }
