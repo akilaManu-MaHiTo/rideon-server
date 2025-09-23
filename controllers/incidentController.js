@@ -42,3 +42,35 @@ exports.getUserIncidents = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.updateIncident = async (req, res) => {
+  try {
+    const { incidentType, howSerious, description, date, time } = req.body;
+    const incidentId = req.params.id;
+
+    let incident = await Incident.findById(incidentId);
+    if (!incident) {
+      return res.status(404).json({ message: "Incident not found" });
+    }
+
+    if (incident.user.toString() !== req.user.id) {
+      return res.status(401).json({ message: "Not Authorized to update this incident" });
+    }
+
+    incident = await Incident.findByIdAndUpdate(
+      incidentId,
+      {
+        incidentType,
+        howSerious,
+        description,
+        date,
+        time // Keep as string since schema expects string
+      },
+      { new: true, runValidators: true }
+    );
+    
+    res.status(200).json(incident);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
