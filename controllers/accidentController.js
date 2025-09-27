@@ -5,7 +5,7 @@ exports.createAccident = async (req, res) => {
     const { title, latitude, longitude } = req.body;
 
     const accident = await Accident.create({
-      title,
+      title : "Emergency",
       latitude,
       longitude,
       user: req.user.id,
