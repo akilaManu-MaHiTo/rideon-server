@@ -74,3 +74,18 @@ exports.updateIncident = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+exports.deleteIncident = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const incident = await Incident.findByIdAndDelete(id);
+
+    if (!incident) {
+      return res.status(404).json({ message: "Incident not found" });
+    }
+    res.status(200).json({ message: "Incident Deleted Successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
