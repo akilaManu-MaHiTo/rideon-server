@@ -20,7 +20,8 @@ exports.createAccident = async (req, res) => {
 
 exports.getAllAccident = async (req, res) => {
   try {
-    const accidents = await Accident.find();
+    const accidents = await Accident.find()
+    .populate('user', 'name mobile');
     res.status(200).json(accidents);
   } catch (err) {
     console.error(err);
