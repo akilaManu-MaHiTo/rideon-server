@@ -13,10 +13,10 @@ const {
 // CRUD Routes
 router.post("/", protect, createBike);
 router.get("/", protect, getAllBike);
-router.get("/:id", protect, getBikeById);
 router.get("/stats", protect, getBikeConditionStats);
 router.put("/:id", protect, UpdateBike);
 router.delete("/:id", protect, deleteBike);
+router.get("/:id", protect, getBikeById);
 
 
 module.exports = router;

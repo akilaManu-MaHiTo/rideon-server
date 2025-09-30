@@ -34,7 +34,7 @@ exports.createBike = async (req, res) => {
 //Get All Bikes
 exports.getAllBike = async (req, res) => {
   try {
-    const bikes = await Bike.find(); 
+    const bikes = await Bike.find();
     res.status(200).json(bikes);
   } catch (err) {
     console.error(err);
@@ -115,29 +115,37 @@ exports.getBikeConditionStats = async (req, res) => {
       return res.status(200).json({ message: "No bikes found", stats: {} });
     }
 
-    const total = bikes.length;
-
-    // Define thresholds
-    let good = 0,
-      average = 0,
-      bad = 0;
+    // Group by fuelType
+    const groupedStats = {};
 
     bikes.forEach((bike) => {
+      const type = bike.fuelType.toLowerCase(); // e.g., "pedal" or "electric"
+
+      if (!groupedStats[type]) {
+        groupedStats[type] = { total: 0, good: 0, average: 0, bad: 0 };
+      }
+
+      groupedStats[type].total++;
+
       if (bike.condition >= 70) {
-        good++;
+        groupedStats[type].good++;
       } else if (bike.condition >= 40) {
-        average++;
+        groupedStats[type].average++;
       } else {
-        bad++;
+        groupedStats[type].bad++;
       }
     });
 
-    // Convert to percentages
-    const stats = {
-      good: ((good / total) * 100).toFixed(2) + "%",
-      average: ((average / total) * 100).toFixed(2) + "%",
-      bad: ((bad / total) * 100).toFixed(2) + "%",
-    };
+    // Convert counts to percentages per fuel type
+    const stats = {};
+    for (const [type, data] of Object.entries(groupedStats)) {
+      const { total, good, average, bad } = data;
+      stats[type] = {
+        good: ((good / total) * 100).toFixed(2) + "%",
+        average: ((average / total) * 100).toFixed(2) + "%",
+        bad: ((bad / total) * 100).toFixed(2) + "%",
+      };
+    }
 
     res.status(200).json(stats);
   } catch (err) {
