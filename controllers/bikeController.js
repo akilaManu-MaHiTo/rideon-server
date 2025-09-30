@@ -105,3 +105,41 @@ exports.getBikeById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//Get Bike Condition Statistics
+exports.getBikeConditionStats = async (req, res) => {
+  try {
+    const bikes = await Bike.find();
+
+    if (!bikes.length) {
+      return res.status(200).json({ message: "No bikes found", stats: {} });
+    }
+
+    const total = bikes.length;
+
+    // Define thresholds
+    let good = 0, average = 0, bad = 0;
+
+    bikes.forEach(bike => {
+      if (bike.condition >= 70) {
+        good++;
+      } else if (bike.condition >= 40) {
+        average++;
+      } else {
+        bad++;
+      }
+    });
+
+    // Convert to percentages
+    const stats = {
+      good: ((good / total) * 100).toFixed(2) + "%",
+      average: ((average / total) * 100).toFixed(2) + "%",
+      bad: ((bad / total) * 100).toFixed(2) + "%",
+    };
+
+    res.status(200).json(stats);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

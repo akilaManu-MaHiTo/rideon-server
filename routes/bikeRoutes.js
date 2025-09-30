@@ -7,6 +7,7 @@ const {
   UpdateBike,
   deleteBike,
   getBikeById,
+  getBikeConditionStats,
 } = require("../controllers/bikeController");
 
 // CRUD Routes
@@ -14,6 +15,7 @@ router.post("/", protect, createBike);
 router.get("/", protect, getAllBike);
 router.put("/:id", protect, UpdateBike);
 router.delete("/:id", protect, deleteBike);
+router.get("/stats", protect, getBikeConditionStats);
 router.get("/:id", protect, getBikeById);
 
 
