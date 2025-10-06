@@ -21,7 +21,8 @@ exports.createAccident = async (req, res) => {
 exports.getAllAccident = async (req, res) => {
   try {
     const accidents = await Accident.find()
-    .populate('user', 'name mobile');
+    .populate('user', 'name mobile')
+    .sort({ createdAt: -1 });
     res.status(200).json(accidents);
   } catch (err) {
     console.error(err);
