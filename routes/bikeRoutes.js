@@ -15,7 +15,7 @@ const {
 router.post("/", protect, createBike);
 router.get("/", protect, getAllBike);
 router.get("/stats", protect, getBikeConditionStats);
-router.get("/getAvailable", protect, getAvailableBikes); // This comes BEFORE dynamic routes
+router.get("/available-bikes", protect, getAvailableBikes); // This comes BEFORE dynamic routes
 
 // DYNAMIC ROUTES LAST
 router.put("/:id", protect, UpdateBike);
