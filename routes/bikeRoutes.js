@@ -8,15 +8,18 @@ const {
   deleteBike,
   getBikeById,
   getBikeConditionStats,
+  getAvailableBikes,
 } = require("../controllers/bikeController");
 
-// CRUD Routes
+// CRUD Routes - SPECIFIC ROUTES FIRST
 router.post("/", protect, createBike);
 router.get("/", protect, getAllBike);
 router.get("/stats", protect, getBikeConditionStats);
+router.get("/getAvailable", protect, getAvailableBikes); // This comes BEFORE dynamic routes
+
+// DYNAMIC ROUTES LAST
 router.put("/:id", protect, UpdateBike);
 router.delete("/:id", protect, deleteBike);
-router.get("/:id", protect, getBikeById);
-
+router.get("/:id", protect, getBikeById); // This should be LAST
 
 module.exports = router;

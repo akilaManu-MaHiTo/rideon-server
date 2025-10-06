@@ -23,6 +23,8 @@ exports.createBike = async (req, res) => {
       fuelType,
       distance,
       condition,
+      availability: true,
+      assigned: false,
     });
     res.status(201).json(bike);
   } catch (err) {
@@ -42,11 +44,24 @@ exports.getAllBike = async (req, res) => {
   }
 };
 
+exports.getAvailableBikes = async (req, res) => {
+  try {
+    const bikes = await Bike.find({ 
+      availability: true, 
+      assigned: false 
+    });
+    res.status(200).json(bikes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 //Update Bike
 exports.UpdateBike = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bikeModel, fuelType, distance, condition } = req.body;
+    const { bikeModel, fuelType, distance, condition, availability, assigned } = req.body;
 
     let prefix = "";
     if (fuelType.toLowerCase() === "electric") {
@@ -66,6 +81,8 @@ exports.UpdateBike = async (req, res) => {
       fuelType,
       distance,
       condition,
+      availability,
+      assigned,
     });
 
     if (!updatedBike) {
