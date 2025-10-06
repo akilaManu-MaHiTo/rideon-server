@@ -119,19 +119,19 @@ exports.searchBikeStation = async (req, res) => {
   try {
     const { keyword } = req.query;
     if (!keyword) {
-      return res.status(400).json({ message: "Keyword is required" });
+      const bikeStations = await BikeStation.find().populate("bikes");
+      res.status(200).json(bikeStations);
+    } else {
+      const bikeStations = await BikeStation.find({
+        $or: [
+          { stationName: { $regex: keyword, $options: "i" } },
+          { stationId: { $regex: keyword, $options: "i" } },
+          { stationLocation: { $regex: keyword, $options: "i" } },
+        ],
+      }).populate("bikes");
+
+      res.status(200).json(bikeStations);
     }
-
-    // Search by stationName, stationId, or stationLocation
-    const bikeStations = await BikeStation.find({
-      $or: [
-        { stationName: { $regex: keyword, $options: "i" } },
-        { stationId: { $regex: keyword, $options: "i" } },
-        { stationLocation: { $regex: keyword, $options: "i" } },
-      ],
-    }).populate("bikes");
-
-    res.status(200).json(bikeStations);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
