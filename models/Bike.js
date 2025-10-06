@@ -7,6 +7,8 @@ const bikesSchema = new mongoose.Schema(
   fuelType: { type: String, required: true },
   distance: { type: Number, required: true },
   condition: { type: Number, required: true },
+  availability: { type: Boolean, required: true, default: true },
+  assigned: { type: Boolean, required: true, default: false },
 },
 { timestamps: true });
 
