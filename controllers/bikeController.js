@@ -18,11 +18,12 @@ exports.createBike = async (req, res) => {
 
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const bikeId = `${prefix}${randomNum}`;
+    const fuelTypeLower = fuelType.toLowerCase();
 
     const bike = await Bike.create({
       bikeId,
       bikeModel,
-      fuelType,
+      fuelType: fuelTypeLower,
       distance,
       condition,
       availability: true,
@@ -55,11 +56,12 @@ exports.createBikeByUser = async (req, res) => {
 
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const bikeId = `${prefix}${randomNum}`;
+    const fuelTypeLower = fuelType.toLowerCase();
 
     const bike = await Bike.create({
       bikeId,
       bikeModel,
-      fuelType,
+      fuelType: fuelTypeLower,
       distance,
       condition,
       availability: true,
@@ -104,8 +106,15 @@ exports.getAvailableBikes = async (req, res) => {
 exports.UpdateBike = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bikeModel, fuelType, distance, condition, availability, assigned, rentApproved } =
-      req.body;
+    const {
+      bikeModel,
+      fuelType,
+      distance,
+      condition,
+      availability,
+      assigned,
+      rentApproved,
+    } = req.body;
 
     let prefix = "";
     if (fuelType.toLowerCase() === "electric") {
@@ -127,7 +136,7 @@ exports.UpdateBike = async (req, res) => {
       condition,
       availability,
       assigned,
-      rentApproved
+      rentApproved,
     });
 
     if (!updatedBike) {
