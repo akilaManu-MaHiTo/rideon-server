@@ -115,6 +115,27 @@ exports.getAllBikeStation = async (req, res) => {
   }
 };
 
+exports.getBikeStationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bikeStation = await BikeStation.findById(id).populate({
+      path: "bikes",
+      match: { availability: true },
+    });
+
+    if (!bikeStation) {
+      return res.status(404).json({ message: "Bike station not found" });
+    }
+    res.status(200).json(bikeStation);
+  } catch (err) {
+    console.error(err);
+    if (err.name === "CastError") {
+      return res.status(400).json({ message: "Invalid station ID" });
+    }
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.searchBikeStation = async (req, res) => {
   try {
     const { keyword } = req.query;
