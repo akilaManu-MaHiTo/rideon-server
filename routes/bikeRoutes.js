@@ -9,13 +9,15 @@ const {
   getBikeById,
   getBikeConditionStats,
   getAvailableBikes,
+  searchBikes,
 } = require("../controllers/bikeController");
 
 // CRUD Routes - SPECIFIC ROUTES FIRST
 router.post("/", protect, createBike);
+router.post("/search", protect, searchBikes);
 router.get("/", protect, getAllBike);
 router.get("/stats", protect, getBikeConditionStats);
-router.get("/available-bikes", protect, getAvailableBikes); // This comes BEFORE dynamic routes
+router.get("/available-bikes", protect, getAvailableBikes); 
 
 // DYNAMIC ROUTES LAST
 router.put("/:id", protect, UpdateBike);
