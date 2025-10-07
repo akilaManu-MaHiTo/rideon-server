@@ -3,9 +3,10 @@ const express = require('express');
 const router = express.Router();
 const packageController = require('../controllers/packageController'); 
 const protect = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 // Create a new package (Admin only)
-router.post('/', protect, packageController.createPackage);
+router.post('/', upload.single("icon"), protect, packageController.createPackage);
 
 // Get all packages (Admin and User)
 router.get('/', protect, packageController.getAllPackages);
@@ -14,10 +15,11 @@ router.get('/', protect, packageController.getAllPackages);
 router.get('/:id', protect, packageController.getPackageById);
 
 // Update a package (Admin only)
-router.put('/:id', protect,packageController.updatePackage);
+router.patch('/:id', upload.single("icon"), protect,packageController.updatePackage);
 
 // Delete a package (Admin only)
 router.delete('/:id', protect, packageController.deletePackage);
+
 
 router.post('/payment-success',protect, packageController.paymentSuccess);
 

@@ -1,4 +1,6 @@
 require("dotenv").config();
+require("./utils/scheduler");
+
 const express = require("express");
 const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
@@ -8,6 +10,8 @@ const bikeStationRoutes = require("./routes/bikeStationRoutes");
 const bikeRoutes = require("./routes/bikeRoutes");
 const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const userPackageRoutes = require("./routes/userPackageRoutes");
+
 
 
 const cors = require("cors");
@@ -29,7 +33,8 @@ app.use("/api/products", productRoutes);
 app.use("/api/bike-station", bikeStationRoutes);
 app.use("/api/bike", bikeRoutes);
 app.use('/api', paymentRoutes);
-app.use('/api/package', packageRoutes);
+app.use("/api/package", packageRoutes);       // Admin Package management
+app.use("/api/user-package", userPackageRoutes); // User package activations
 
 
 app.get('/', (req, res) => {
