@@ -14,7 +14,7 @@ const {
 
 // CRUD Routes - SPECIFIC ROUTES FIRST
 router.post("/", protect, createBike);
-router.post("/search", protect, searchBikes);
+router.get("/search", protect, searchBikes);
 router.get("/", protect, getAllBike);
 router.get("/stats", protect, getBikeConditionStats);
 router.get("/available-bikes", protect, getAvailableBikes); 
