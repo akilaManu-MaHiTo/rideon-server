@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    rc: { 
+      type: Number, 
+      default: 0 
+    },
     userName: { type: String, required: true, unique: true },
   },
   { timestamps: true }

@@ -1,4 +1,6 @@
 require("dotenv").config();
+require("./utils/scheduler");
+
 const express = require("express");
 const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
@@ -10,6 +12,9 @@ const packageRoutes = require('./routes/packageRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const IncidentRoutes = require('./routes/incidentRoutes');
 const AccidentRoutes = require('./routes/accidentRoutes');
+const userPackageRoutes = require("./routes/userPackageRoutes");
+
+
 
 const cors = require("cors");
 const app = express();
@@ -33,6 +38,9 @@ app.use('/api', paymentRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/incident', IncidentRoutes);
 app.use('/api/accident', AccidentRoutes);
+app.use("/api/package", packageRoutes);       // Admin Package management
+app.use("/api/user-package", userPackageRoutes); // User package activations
+
 
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
