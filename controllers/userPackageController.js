@@ -8,7 +8,7 @@ const User = require("../models/User");
  * @access  Private (User)
  */
 exports.activatePackage = async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
   const { packageId } = req.body;
 
   try {
@@ -95,7 +95,7 @@ exports.activatePackage = async (req, res) => {
 
 // Get user's active packages (auto expiry check)
 exports.getActivePackages = async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
   try {
     const now = new Date();
     await UserPackage.deleteMany({ expiresAt: { $lt: now } }); // clean expired
@@ -127,7 +127,7 @@ exports.getActivePackages = async (req, res) => {
  * @access  Private (User)
  */
 exports.getUserRCTotal = async (req, res) => {
-  const userId = req.user._id;
+  const userId = req.user.id;
 
   try {
     const user = await User.findById(userId).select("rc name email");
@@ -158,7 +158,7 @@ exports.getUserRCTotal = async (req, res) => {
 
 // // Deactivate a user's package (optional)
 // exports.deactivatePackage = async (req, res) => {
-//   const userId = req.user._id;
+//   const userId = req.user.id;
 //   const { packageId } = req.body;
 
 //   try {
