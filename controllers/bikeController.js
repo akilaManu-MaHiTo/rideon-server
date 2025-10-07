@@ -247,3 +247,15 @@ exports.searchBikes = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+//Get Bikes by user
+exports.getBikesByUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const bikes = await Bike.find({ createdBy: userId });
+    res.status(200).json(bikes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
