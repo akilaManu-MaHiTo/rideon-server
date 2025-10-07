@@ -1,9 +1,11 @@
 const Bike = require("../models/Bike");
 
-//Create Bike
+//Create Bike by admin
 exports.createBike = async (req, res) => {
   try {
     const { bikeModel, fuelType, distance, condition } = req.body;
+
+    const userId = req.user.id;
 
     let prefix = "";
     if (fuelType.toLowerCase() === "electric") {
@@ -25,6 +27,45 @@ exports.createBike = async (req, res) => {
       condition,
       availability: true,
       assigned: false,
+      rentApproved: true,
+      createdBy: userId,
+    });
+    res.status(201).json(bike);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//create bike by user
+exports.createBikeByUser = async (req, res) => {
+  try {
+    const { bikeModel, fuelType, distance, condition } = req.body;
+
+    const userId = req.user.id;
+
+    let prefix = "";
+    if (fuelType.toLowerCase() === "electric") {
+      prefix = "EV";
+    } else if (fuelType.toLowerCase() === "pedal") {
+      prefix = "PD";
+    } else {
+      prefix = "BK";
+    }
+
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const bikeId = `${prefix}${randomNum}`;
+
+    const bike = await Bike.create({
+      bikeId,
+      bikeModel,
+      fuelType,
+      distance,
+      condition,
+      availability: true,
+      assigned: false,
+      rentApproved: false,
+      createdBy: userId,
     });
     res.status(201).json(bike);
   } catch (err) {
@@ -36,7 +77,8 @@ exports.createBike = async (req, res) => {
 //Get All Bikes
 exports.getAllBike = async (req, res) => {
   try {
-    const bikes = await Bike.find();
+    const bikes = await Bike.find().populate("createdBy", "-password");
+
     res.status(200).json(bikes);
   } catch (err) {
     console.error(err);
@@ -44,11 +86,12 @@ exports.getAllBike = async (req, res) => {
   }
 };
 
+//get available bikes
 exports.getAvailableBikes = async (req, res) => {
   try {
-    const bikes = await Bike.find({ 
-      availability: true, 
-      assigned: false 
+    const bikes = await Bike.find({
+      availability: true,
+      assigned: false,
     });
     res.status(200).json(bikes);
   } catch (err) {
@@ -61,7 +104,8 @@ exports.getAvailableBikes = async (req, res) => {
 exports.UpdateBike = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bikeModel, fuelType, distance, condition, availability, assigned } = req.body;
+    const { bikeModel, fuelType, distance, condition, availability, assigned, rentApproved } =
+      req.body;
 
     let prefix = "";
     if (fuelType.toLowerCase() === "electric") {
@@ -83,6 +127,7 @@ exports.UpdateBike = async (req, res) => {
       condition,
       availability,
       assigned,
+      rentApproved
     });
 
     if (!updatedBike) {
@@ -165,6 +210,29 @@ exports.getBikeConditionStats = async (req, res) => {
     }
 
     res.status(200).json(stats);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//Search Bikes
+exports.searchBikes = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      const bikes = await Bike.find().populate("createdBy", "-password");
+      res.status(200).json(bikes);
+    } else {
+      const bikes = await Bike.find({
+        $or: [
+          { bikeId: { $regex: query, $options: "i" } },
+          { bikeModel: { $regex: query, $options: "i" } },
+          { fuelType: { $regex: query, $options: "i" } },
+        ],
+      });
+      res.status(200).json(bikes);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
