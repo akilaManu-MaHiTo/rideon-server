@@ -13,7 +13,7 @@ const {
 // CRUD Routes
 router.post("/", protect, createBikeStation);
 router.get("/", protect, getAllBikeStation);
-router.get("/:id", protect, getBikeStationById);
+router.get("/bike-id/:id", protect, getBikeStationById);
 router.get("/search", protect, searchBikeStation);
 router.put("/:id", protect, updateBikeStation);
 router.delete("/:id", protect, deleteBikeStation);
