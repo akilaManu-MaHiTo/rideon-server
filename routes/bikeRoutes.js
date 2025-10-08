@@ -11,10 +11,12 @@ const {
   getAvailableBikes,
   searchBikes,
   getBikesByUser,
+  createBikeByUser,
 } = require("../controllers/bikeController");
 
 // CRUD Routes - SPECIFIC ROUTES FIRST
 router.post("/", protect, createBike);
+router.post("/user-bikes", protect, createBikeByUser)
 router.get("/search", protect, searchBikes);
 router.get("/user-bikes", protect, getBikesByUser);
 router.get("/", protect, getAllBike);
