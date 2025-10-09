@@ -19,6 +19,7 @@ const rentBikeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "BikeStation",
     },
+    isRented: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
