@@ -1,9 +1,17 @@
 const Incident = require("../models/Incident");
+const RentBike = require("../models/RentBike");
 
 exports.createIncident = async (req, res) => {
   try {
-    const { incidentType, howSerious, description, date, time } = req.body;
-    
+    const { incidentType, howSerious, description, date, time, stopRide } = req.body;
+
+    if (stopRide === true) {
+      await RentBike.findOneAndUpdate(
+        { userId: req.user.id, isRented: true },
+        { isRented: false },
+        { new: true }
+      );
+    }
     const incident = await Incident.create({
       incidentType,
       howSerious,
