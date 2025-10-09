@@ -1,10 +1,11 @@
+const e = require("cors");
 const mongoose = require("mongoose");
 
 const bikesSchema = new mongoose.Schema(
     {
   bikeId: { type: String, required: true },
   bikeModel: { type: String, required: true },
-  fuelType: { type: String, required: true },
+  fuelType: { type: String, required: true, enum: ["pedal", "electric"] },
   distance: { type: Number, required: true },
   condition: { type: Number, required: true },
   availability: { type: Boolean, required: true, default: true },
