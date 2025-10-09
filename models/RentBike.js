@@ -15,6 +15,10 @@ const rentBikeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    selectedStationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BikeStation",
+    },
     expiresAt: { type: Date, required: true },
   },
   { timestamps: true }
