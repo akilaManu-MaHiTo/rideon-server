@@ -9,6 +9,7 @@ exports.createAccident = async (req, res) => {
       latitude,
       longitude,
       user: req.user.id,
+      isRented: true,
     });
 
     res.status(201).json(accident);
