@@ -2,13 +2,38 @@ const RentBike = require("../models/RentBike");
 const User = require("../models/User");
 exports.rentBikeCreate = async (req, res) => {
   try {
-    const { bikeId, distance, duration, rcPrice, selectedStationId } = req.body;
+    const {
+      bikeId,
+      distance,
+      duration,
+      rcPrice,
+      selectedStationId,
+      latitude,
+      longitude,
+    } = req.body;
     const id = req.user.id;
 
-    if (!bikeId || !distance || !duration || !rcPrice || !selectedStationId) {
+    if (
+      !bikeId ||
+      !distance ||
+      !duration ||
+      !rcPrice ||
+      !selectedStationId ||
+      !latitude ||
+      !longitude
+    ) {
       return res
         .status(400)
         .json({ message: "All required fields must be provided" });
+    }
+    const existingActive = await RentBike.findOne({
+      userId: id,
+      isRented: true,
+    });
+    if (existingActive) {
+      return res
+        .status(400)
+        .json({ message: "User already has an active rented bike" });
     }
 
     const findUser = await User.findById(id);
@@ -33,6 +58,8 @@ exports.rentBikeCreate = async (req, res) => {
       rcPrice,
       userId: id,
       selectedStationId,
+      latitude,
+      longitude,
     });
 
     const savedRentBike = await rentBike.save();
@@ -42,5 +69,30 @@ exports.rentBikeCreate = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error creating rent bike", error: error.message });
+  }
+};
+
+exports.getRentedBike = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const rentedBikes = await RentBike.findOne({ userId, isRented: true })
+
+      .populate("bikeId")
+      .populate("userId", "-password")
+      .populate({
+        path: "selectedStationId",
+        populate: {
+          path: "bikes",
+          model: "Bike",
+        },
+      });
+
+    res.json(rentedBikes);
+  } catch (error) {
+    console.error("Error fetching rented bikes:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error: Unable to fetch rented bikes",
+    });
   }
 };
