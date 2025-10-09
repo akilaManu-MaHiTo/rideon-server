@@ -29,6 +29,7 @@ exports.createBike = async (req, res) => {
       availability: true,
       assigned: false,
       rentApproved: true,
+      rentRejected: false,
       createdBy: userId,
     });
     res.status(201).json(bike);
@@ -67,6 +68,7 @@ exports.createBikeByUser = async (req, res) => {
       availability: true,
       assigned: false,
       rentApproved: false,
+      rentRejected: false,
       createdBy: userId,
     });
     res.status(201).json(bike);
@@ -114,6 +116,7 @@ exports.UpdateBike = async (req, res) => {
       availability,
       assigned,
       rentApproved,
+      rentRejected
     } = req.body;
 
     let prefix = "";
@@ -137,6 +140,7 @@ exports.UpdateBike = async (req, res) => {
       availability,
       assigned,
       rentApproved,
+      rentRejected
     });
 
     if (!updatedBike) {

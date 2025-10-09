@@ -11,6 +11,7 @@ const bikesSchema = new mongoose.Schema(
   availability: { type: Boolean, required: true, default: true },
   assigned: { type: Boolean, required: true, default: false },
   rentApproved: { type: Boolean, required: true, default: false },
+  rentRejected: { type: Boolean, required: true, default: false },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 },
 { timestamps: true });
