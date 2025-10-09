@@ -1,15 +1,19 @@
 const Accident = require("../models/accident");
+const RentBike = require("../models/RentBike");
 
 exports.createAccident = async (req, res) => {
   try {
     const { title, latitude, longitude } = req.body;
-
+    await RentBike.findOneAndUpdate(
+      { userId: req.user.id, isRented: true },
+      { isRented: false },
+      { new: true }
+    );
     const accident = await Accident.create({
       title : "Emergency",
       latitude,
       longitude,
       user: req.user.id,
-      isRented: true,
     });
 
     res.status(201).json(accident);
