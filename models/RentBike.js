@@ -19,9 +19,8 @@ const rentBikeSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "BikeStation",
     },
-    expiresAt: { type: Date, required: true },
   },
   { timestamps: true }
 );
-rentBikeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
 module.exports = mongoose.model("rentBike", rentBikeSchema);

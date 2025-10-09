@@ -4,7 +4,7 @@ exports.rentBikeCreate = async (req, res) => {
   try {
     const { bikeId, distance, duration, rcPrice, expiresAt,selectedStationId } = req.body;
     const id = req.user.id;
-    if (!bikeId || !distance || !duration || !rcPrice || !expiresAt || !selectedStationId) {
+    if (!bikeId || !distance || !duration || !rcPrice || !selectedStationId) {
       return res
         .status(400)
         .json({ message: "All required fields must be provided" });
@@ -16,7 +16,6 @@ exports.rentBikeCreate = async (req, res) => {
       duration,
       rcPrice,
       userId: id,
-      expiresAt,
       selectedStationId
     });
 
