@@ -14,7 +14,6 @@ exports.createObstacle = async (req, res) => {
     const obstacle = await Obstacle.create({
       name,
       category,
-      isShow: Boolean(isShow),
       obstacleLatitude,
       obstacleLongitude,
       userId: req.user.id,
