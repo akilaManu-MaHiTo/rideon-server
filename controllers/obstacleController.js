@@ -56,26 +56,12 @@ exports.updateObstacle = async (req, res) => {
 exports.updateObstacleIsShow = async (req, res) => {
   try {
     const { id } = req.params;
-    const { isShow } = req.body;
-
-    if (typeof isShow !== "boolean") {
-      return res.status(400).json({ message: "isShow must be a boolean" });
-    }
-
-    const obstacle = await Obstacle.findById(id);
-    if (!obstacle)
-      return res.status(404).json({ message: "Obstacle not found" });
-
-    // Only owner can toggle visibility
-    if (obstacle.userId.toString() !== req.user.id) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to update this obstacle" });
-    }
-
-    obstacle.isShow = isShow;
+    const obstacle = await Obstacle.findByIdAndUpdate(
+      { id },
+      { isShow: false },
+      { new: true }
+    );
     await obstacle.save();
-
     res.status(200).json(obstacle);
   } catch (err) {
     console.error(err);
