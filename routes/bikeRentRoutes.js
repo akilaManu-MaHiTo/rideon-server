@@ -2,7 +2,8 @@ const express = require("express");
 const {
   rentBikeCreate,
   getRentedBike,
-  tripEnd,
+    tripEnd,
+  getAllRentedBike,
 } = require("../controllers/bikeRentController");
 const protect = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -10,5 +11,5 @@ const router = express.Router();
 router.post("/", protect, rentBikeCreate);
 router.get("/", protect, getRentedBike);
 router.put("/trip-end", protect, tripEnd);
-
+router.get("/all-rented", protect, getAllRentedBike);
 module.exports = router;

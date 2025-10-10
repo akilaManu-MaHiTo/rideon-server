@@ -1,3 +1,4 @@
+const { model } = require("mongoose");
 const RentBike = require("../models/RentBike");
 const User = require("../models/User");
 const Bike = require("../models/Bike");
@@ -11,6 +12,8 @@ exports.rentBikeCreate = async (req, res) => {
       selectedStationId,
       latitude,
       longitude,
+      userLatitude,
+      userLongitude,
     } = req.body;
     const id = req.user.id;
 
@@ -21,7 +24,9 @@ exports.rentBikeCreate = async (req, res) => {
       !rcPrice ||
       !selectedStationId ||
       !latitude ||
-      !longitude
+      !longitude ||
+      !userLatitude ||
+      !userLongitude
     ) {
       return res
         .status(400)
@@ -61,6 +66,8 @@ exports.rentBikeCreate = async (req, res) => {
       selectedStationId,
       latitude,
       longitude,
+      userLatitude,
+      userLongitude,
     });
 
     const savedRentBike = await rentBike.save();
@@ -78,7 +85,45 @@ exports.getRentedBike = async (req, res) => {
     const userId = req.user.id;
     const rentedBikes = await RentBike.findOne({ userId, isRented: true })
 
-      .populate("bikeId")
+      .populate({
+        path: "bikeId",
+        populate: {
+          path: "createdBy",
+          model: "User",
+          select: "-password -rc",
+        },
+      })
+      .populate("userId", "-password")
+      .populate({
+        path: "selectedStationId",
+        populate: {
+          path: "bikes",
+          model: "Bike",
+        },
+      });
+
+    res.json(rentedBikes);
+  } catch (error) {
+    console.error("Error fetching rented bikes:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error: Unable to fetch rented bikes",
+    });
+  }
+};
+
+exports.getAllRentedBike = async (req, res) => {
+  try {
+    const rentedBikes = await RentBike.find({ isRented: true })
+
+      .populate({
+        path: "bikeId",
+        populate: {
+          path: "createdBy",
+          model: "User",
+          select: "-password -rc",
+        },
+      })
       .populate("userId", "-password")
       .populate({
         path: "selectedStationId",
