@@ -15,20 +15,14 @@ router.get('/my-notifications', protect, notificationController.getMyNotificatio
 // Get notification statistics
 router.get('/stats', protect, notificationController.getNotificationStats);
 
-// Mark all notifications as read for current user
-router.patch('/mark-all-read', protect, notificationController.markAllAsRead);
-
 // Bulk delete notifications
 router.delete('/bulk-delete', protect, notificationController.bulkDeleteNotifications);
 
 // Get notification by ID
 router.get('/:id', protect, notificationController.getNotificationById);
 
-// Update notification
+// Update notification (Admin only)
 router.put('/:id', protect, notificationController.updateNotification);
-
-// Mark notification as read
-router.patch('/:id/read', protect, notificationController.markAsRead);
 
 // Delete notification
 router.delete('/:id', protect, notificationController.deleteNotification);

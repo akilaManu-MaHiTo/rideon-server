@@ -8,26 +8,13 @@ const User = require("../models/User");
  */
 exports.createNotification = async (req, res) => {
   try {
-    const {
-      userId,
-      title,
-      message,
-      type,
-      category,
-      priority,
-      relatedEntityType,
-      relatedEntityId,
-      actionUrl,
-      expiresAt,
-      scheduledFor,
-      metadata
-    } = req.body;
+    const { userId, text, category } = req.body;
 
     // Validate required fields
-    if (!userId || !title || !message) {
+    if (!userId || !text) {
       return res.status(400).json({
         success: false,
-        message: "User ID, title, and message are required"
+        message: "User ID and text are required"
       });
     }
 
@@ -43,17 +30,8 @@ exports.createNotification = async (req, res) => {
     // Create notification
     const notification = new Notification({
       userId,
-      title,
-      message,
-      type,
-      category,
-      priority,
-      relatedEntityType,
-      relatedEntityId,
-      actionUrl,
-      expiresAt,
-      scheduledFor,
-      metadata
+      text,
+      category
     });
 
     await notification.save();
@@ -87,10 +65,7 @@ exports.getAllNotifications = async (req, res) => {
       page = 1,
       limit = 10,
       userId,
-      type,
       category,
-      isRead,
-      priority,
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = req.query;
@@ -98,10 +73,7 @@ exports.getAllNotifications = async (req, res) => {
     // Build filter object
     const filter = {};
     if (userId) filter.userId = userId;
-    if (type) filter.type = type;
     if (category) filter.category = category;
-    if (isRead !== undefined) filter.isRead = isRead === 'true';
-    if (priority) filter.priority = priority;
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -152,28 +124,14 @@ exports.getMyNotifications = async (req, res) => {
     const {
       page = 1,
       limit = 10,
-      type,
       category,
-      isRead,
-      priority,
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = req.query;
 
     // Build filter object
     const filter = { userId };
-    if (type) filter.type = type;
     if (category) filter.category = category;
-    if (isRead !== undefined) filter.isRead = isRead === 'true';
-    if (priority) filter.priority = priority;
-
-    // Don't show expired notifications unless specifically requested
-    if (req.query.includeExpired !== 'true') {
-      filter.$or = [
-        { expiresAt: { $exists: false } },
-        { expiresAt: { $gt: new Date() } }
-      ];
-    }
 
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -190,20 +148,9 @@ exports.getMyNotifications = async (req, res) => {
     const totalNotifications = await Notification.countDocuments(filter);
     const totalPages = Math.ceil(totalNotifications / parseInt(limit));
 
-    // Get unread count
-    const unreadCount = await Notification.countDocuments({
-      userId,
-      isRead: false,
-      $or: [
-        { expiresAt: { $exists: false } },
-        { expiresAt: { $gt: new Date() } }
-      ]
-    });
-
     res.status(200).json({
       success: true,
       data: notifications,
-      unreadCount,
       pagination: {
         currentPage: parseInt(page),
         totalPages,
@@ -268,13 +215,12 @@ exports.getNotificationById = async (req, res) => {
 /**
  * @desc    Update notification
  * @route   PUT /api/notifications/:id
- * @access  Private (Admin or Owner)
+ * @access  Private (Admin only)
  */
 exports.updateNotification = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const { text, category } = req.body;
 
     const notification = await Notification.findById(id);
 
@@ -285,45 +231,9 @@ exports.updateNotification = async (req, res) => {
       });
     }
 
-    // Check permissions
-    if (userRole !== 'Admin' && notification.userId.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied"
-      });
-    }
-
-    const allowedUpdates = [
-      'title', 'message', 'type', 'category', 'priority',
-      'relatedEntityType', 'relatedEntityId', 'actionUrl',
-      'expiresAt', 'scheduledFor', 'metadata'
-    ];
-
-    // If user is not admin, limit what they can update
-    if (userRole !== 'Admin') {
-      const userAllowedUpdates = ['isRead'];
-      Object.keys(req.body).forEach(key => {
-        if (!userAllowedUpdates.includes(key)) {
-          delete req.body[key];
-        }
-      });
-    }
-
-    const updates = Object.keys(req.body);
-    const isValidOperation = updates.every(update => 
-      allowedUpdates.includes(update) || update === 'isRead'
-    );
-
-    if (!isValidOperation) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid updates"
-      });
-    }
-
-    updates.forEach(update => {
-      notification[update] = req.body[update];
-    });
+    // Update fields if provided
+    if (text) notification.text = text;
+    if (category) notification.category = category;
 
     await notification.save();
     await notification.populate('userId', 'userName email');
@@ -343,79 +253,7 @@ exports.updateNotification = async (req, res) => {
   }
 };
 
-/**
- * @desc    Mark notification as read
- * @route   PATCH /api/notifications/:id/read
- * @access  Private
- */
-exports.markAsRead = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    const userRole = req.user.role;
 
-    const notification = await Notification.findById(id);
-
-    if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: "Notification not found"
-      });
-    }
-
-    // Check permissions
-    if (userRole !== 'Admin' && notification.userId.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied"
-      });
-    }
-
-    notification.isRead = true;
-    await notification.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Notification marked as read",
-      data: notification
-    });
-  } catch (error) {
-    console.error("Mark as read error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message
-    });
-  }
-};
-
-/**
- * @desc    Mark all notifications as read for current user
- * @route   PATCH /api/notifications/mark-all-read
- * @access  Private
- */
-exports.markAllAsRead = async (req, res) => {
-  try {
-    const userId = req.user.id;
-
-    const result = await Notification.updateMany(
-      { userId, isRead: false },
-      { isRead: true }
-    );
-
-    res.status(200).json({
-      success: true,
-      message: `${result.modifiedCount} notifications marked as read`
-    });
-  } catch (error) {
-    console.error("Mark all as read error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message
-    });
-  }
-};
 
 /**
  * @desc    Delete notification
@@ -522,29 +360,7 @@ exports.getNotificationStats = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalNotifications: { $sum: 1 },
-          unreadNotifications: {
-            $sum: { $cond: [{ $eq: ["$isRead", false] }, 1, 0] }
-          },
-          readNotifications: {
-            $sum: { $cond: [{ $eq: ["$isRead", true] }, 1, 0] }
-          },
-          highPriorityNotifications: {
-            $sum: { $cond: [{ $eq: ["$priority", "high"] }, 1, 0] }
-          },
-          urgentNotifications: {
-            $sum: { $cond: [{ $eq: ["$priority", "urgent"] }, 1, 0] }
-          }
-        }
-      }
-    ]);
-
-    const typeStats = await Notification.aggregate([
-      { $match: matchStage },
-      {
-        $group: {
-          _id: "$type",
-          count: { $sum: 1 }
+          totalNotifications: { $sum: 1 }
         }
       }
     ]);
@@ -563,13 +379,8 @@ exports.getNotificationStats = async (req, res) => {
       success: true,
       data: {
         overview: stats[0] || {
-          totalNotifications: 0,
-          unreadNotifications: 0,
-          readNotifications: 0,
-          highPriorityNotifications: 0,
-          urgentNotifications: 0
+          totalNotifications: 0
         },
-        byType: typeStats,
         byCategory: categoryStats
       }
     });
