@@ -57,14 +57,16 @@ exports.updateObstacleIsShow = async (req, res) => {
   try {
     const { id } = req.params;
     const obstacle = await Obstacle.findByIdAndUpdate(
-      { id },
+      id,
       { isShow: false },
       { new: true }
     );
-    await obstacle.save();
+    if (!obstacle) {
+      return res.status(404).json({ message: "Obstacle not found" });
+    }
     res.status(200).json(obstacle);
   } catch (err) {
-    console.error(err);
+    console.error("Error updating obstacle:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
