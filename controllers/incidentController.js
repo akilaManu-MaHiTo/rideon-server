@@ -54,7 +54,7 @@ exports.getUserIncidents = async (req, res) => {
 };
 exports.updateIncident = async (req, res) => {
   try {
-    const { incidentType, howSerious, description, date, time } = req.body;
+    const { incidentType, howSerious, description, date, time, stopRide } = req.body;
     const incidentId = req.params.id;
 
     let incident = await Incident.findById(incidentId);
@@ -75,7 +75,8 @@ exports.updateIncident = async (req, res) => {
         howSerious,
         description,
         date,
-        time, // Keep as string since schema expects string
+        time, 
+        stopRide
       },
       { new: true, runValidators: true }
     );
