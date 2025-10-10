@@ -24,6 +24,8 @@ const rentBikeSchema = new mongoose.Schema(
     longitude: { type: Number, required: true},
     userLatitude: {type: Number, required: true},
     userLongitude: {type: Number, required: true},
+    fromLatitude: { type: Number, required: true },
+    fromLongitude: { type: Number, required: true },    
   },
   { timestamps: true }
 );

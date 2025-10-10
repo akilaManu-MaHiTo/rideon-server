@@ -14,6 +14,8 @@ exports.rentBikeCreate = async (req, res) => {
       longitude,
       userLatitude,
       userLongitude,
+      fromLatitude,
+      fromLongitude
     } = req.body;
     const id = req.user.id;
 
@@ -26,7 +28,9 @@ exports.rentBikeCreate = async (req, res) => {
       !latitude ||
       !longitude ||
       !userLatitude ||
-      !userLongitude
+      !userLongitude ||
+      !fromLatitude ||
+      !fromLongitude
     ) {
       return res
         .status(400)
@@ -68,6 +72,8 @@ exports.rentBikeCreate = async (req, res) => {
       longitude,
       userLatitude,
       userLongitude,
+      fromLatitude,
+      fromLongitude
     });
 
     const savedRentBike = await rentBike.save();
