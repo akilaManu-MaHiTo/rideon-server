@@ -4,7 +4,7 @@ const obstacleSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     category: { type: String, required: true },
-    isShow: { type: Boolean, default: false },
+    isShow: { type: Boolean, default: true },
     obstacleLatitude: { type: Number, required: true },
     obstacleLongitude: { type: Number, required: true },
     userId: {
