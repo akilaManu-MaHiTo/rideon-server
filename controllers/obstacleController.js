@@ -86,13 +86,7 @@ exports.updateObstacleIsShow = async (req, res) => {
 
 exports.getObstacles = async (req, res) => {
   try {
-    const { isShow } = req.query;
-    const filter = {};
-    if (isShow !== undefined) {
-      filter.isShow = isShow === "true";
-    }
-
-    const obstacles = await Obstacle.find(filter)
+    const obstacles = await Obstacle.find({ isShow: true })
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
