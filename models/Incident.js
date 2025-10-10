@@ -7,7 +7,8 @@ const incidentSchema = new mongoose.Schema(
     description: { type: String, required: true },
     date: { type: Date, required: true },
     time: { type: String, required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    stopRide: { type: Boolean, required: true }
   },
   { timestamps: true }
 );

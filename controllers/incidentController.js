@@ -1,16 +1,26 @@
 const Incident = require("../models/Incident");
+const RentBike = require("../models/RentBike");
 
 exports.createIncident = async (req, res) => {
   try {
-    const { incidentType, howSerious, description, date, time } = req.body;
-    
+    const { incidentType, howSerious, description, date, time, stopRide } =
+      req.body;
+
+    if (stopRide === true) {
+      await RentBike.findOneAndUpdate(
+        { userId: req.user.id, isRented: true },
+        { isRented: false },
+        { new: true }
+      );
+    }
     const incident = await Incident.create({
       incidentType,
       howSerious,
       description,
       date,
       time,
-      user: req.user.id  // Add user ID from the auth middleware
+      user: req.user.id,
+      stopRide,
     });
 
     res.status(201).json(incident);
@@ -22,7 +32,7 @@ exports.createIncident = async (req, res) => {
 
 exports.getAllIncident = async (req, res) => {
   try {
-    const incidents = await Incident.find().populate('user', 'name email');
+    const incidents = await Incident.find().populate("user", "name email");
     res.status(200).json(incidents);
   } catch (err) {
     console.error(err);
@@ -33,7 +43,7 @@ exports.getAllIncident = async (req, res) => {
 exports.getUserIncidents = async (req, res) => {
   try {
     const incidents = await Incident.find({ user: req.user.id })
-      .populate('user', 'name email')
+      .populate("user", "name email")
       .sort({ createdAt: -1 });
 
     res.status(200).json(incidents);
@@ -53,7 +63,9 @@ exports.updateIncident = async (req, res) => {
     }
 
     if (incident.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: "Not Authorized to update this incident" });
+      return res
+        .status(401)
+        .json({ message: "Not Authorized to update this incident" });
     }
 
     incident = await Incident.findByIdAndUpdate(
@@ -63,11 +75,11 @@ exports.updateIncident = async (req, res) => {
         howSerious,
         description,
         date,
-        time // Keep as string since schema expects string
+        time, // Keep as string since schema expects string
       },
       { new: true, runValidators: true }
     );
-    
+
     res.status(200).json(incident);
   } catch (error) {
     console.log(error);
