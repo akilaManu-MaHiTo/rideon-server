@@ -2,7 +2,8 @@ const Obstacle = require("../models/Obstacle");
 
 exports.createObstacle = async (req, res) => {
   try {
-    const { name, category, isShow } = req.body;
+    const { name, category, isShow, obstacleLatitude, obstacleLongitude } =
+      req.body;
 
     if (!name || category === undefined) {
       return res
@@ -14,6 +15,8 @@ exports.createObstacle = async (req, res) => {
       name,
       category,
       isShow: Boolean(isShow),
+      obstacleLatitude,
+      obstacleLongitude,
       userId: req.user.id,
     });
 
