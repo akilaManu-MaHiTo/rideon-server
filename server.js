@@ -15,6 +15,7 @@ const AccidentRoutes = require('./routes/accidentRoutes');
 const obstacleRoutes = require('./routes/obstacleRoutes');
 const userPackageRoutes = require("./routes/userPackageRoutes");
 const rentBikeRoutes = require("./routes/bikeRentRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 
 const cors = require("cors");
@@ -43,6 +44,7 @@ app.use('/api/obstacle', obstacleRoutes);
 app.use("/api/package", packageRoutes);       // Admin Package management
 app.use("/api/user-package", userPackageRoutes); // User package activations
 app.use("/api/rent-bike", rentBikeRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
