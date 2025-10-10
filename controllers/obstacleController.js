@@ -85,11 +85,20 @@ exports.updateObstacleIsShow = async (req, res) => {
 
 exports.getObstacles = async (req, res) => {
   try {
-    const obstacles = await Obstacle.find({ isShow: true })
-      .populate("userId", "name email")
-      .sort({ createdAt: -1 });
+    const { category } = req.query;
 
-    res.status(200).json(obstacles);
+    if (!category) {
+      const obstacles = await Obstacle.find({ isShow: true })
+        .populate("userId", "-password")
+        .sort({ createdAt: -1 });
+      res.status(200).json(obstacles);
+    } else {
+      const obstacles = await Obstacle.find({ isShow: true, category })
+        .populate("userId", "-password")
+        .sort({ createdAt: -1 });
+
+      res.status(200).json(obstacles);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
