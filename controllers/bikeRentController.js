@@ -71,6 +71,22 @@ exports.rentBikeCreate = async (req, res) => {
       { new: true }
     );
 
+    const bike = await Bike.findByIdAndUpdate(
+      bikeId,
+      { availability: false },
+      { new: true }
+    );
+
+    const ADD_RC_TO_BIKE_OWNER = rcPrice * 0.1;
+    const rentedBikeOwner = await Bike.findById(bikeId);
+    if (rentedBikeOwner && rentedBikeOwner.createdBy) {
+      await User.findByIdAndUpdate(
+        rentedBikeOwner.createdBy,
+        { $inc: { rc: ADD_RC_TO_BIKE_OWNER } },
+        { new: true }
+      );
+    }
+
     const rentBike = new RentBike({
       bikeId,
       distance,
