@@ -16,17 +16,25 @@ exports.getLeaderboard = async (req, res) => {
 
     const match = {};
     const now = new Date();
+    
     if (period === "month") {
+      // First day of current month at 00:00:00
       const start = new Date(now.getFullYear(), now.getMonth(), 1);
       match.createdAt = { $gte: start };
+      console.log(`Month filter: from ${start.toISOString()}`);
     } else if (period === "week") {
+      // Last 7 days (simple approach)
       const start = new Date(now);
       start.setDate(now.getDate() - 7);
+      start.setHours(0, 0, 0, 0);
       match.createdAt = { $gte: start };
+      console.log(`Week filter: from ${start.toISOString()}`);
     } else if (period === "day") {
+      // Start of today (00:00:00)
       const start = new Date(now);
-      start.setDate(now.getDate() - 1);
+      start.setHours(0, 0, 0, 0);
       match.createdAt = { $gte: start };
+      console.log(`Day filter: from ${start.toISOString()}`);
     }
 
     // Aggregate total rcPrice spent per user
