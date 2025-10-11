@@ -175,6 +175,37 @@ exports.getAllRentedBike = async (req, res) => {
   }
 };
 
+exports.getAllRentedBikeHistory = async (req, res) => {
+  try {
+    const rentedBikes = await RentBike.find({ isRented: false })
+
+      .populate({
+        path: "bikeId",
+        populate: {
+          path: "createdBy",
+          model: "User",
+          select: "-password -rc",
+        },
+      })
+      .populate("userId", "-password")
+      .populate({
+        path: "selectedStationId",
+        populate: {
+          path: "bikes",
+          model: "Bike",
+        },
+      });
+
+    res.json(rentedBikes);
+  } catch (error) {
+    console.error("Error fetching rented bikes:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error: Unable to fetch rented bikes",
+    });
+  }
+};
+
 exports.tripEnd = async (req, res) => {
   try {
     const userId = req.user.id;

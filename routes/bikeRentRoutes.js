@@ -5,6 +5,7 @@ const {
     tripEnd,
   getAllRentedBike,
   updateUserLocation,
+  getAllRentedBikeHistory,
 } = require("../controllers/bikeRentController");
 const protect = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -14,4 +15,5 @@ router.get("/", protect, getRentedBike);
 router.put("/trip-end", protect, tripEnd);
 router.get("/all-rented", protect, getAllRentedBike);
 router.put("/me", protect, updateUserLocation);
+router.get("/rented-bike-his", protect, getAllRentedBikeHistory);
 module.exports = router;
