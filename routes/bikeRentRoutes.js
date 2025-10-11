@@ -15,5 +15,5 @@ router.get("/", protect, getRentedBike);
 router.put("/trip-end", protect, tripEnd);
 router.get("/all-rented", protect, getAllRentedBike);
 router.put("/me", protect, updateUserLocation);
-router.get("/rented-bike-his", protect, getAllRentedBikeHistory);
+router.get("/rented-bike-history", protect, getAllRentedBikeHistory);
 module.exports = router;
