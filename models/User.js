@@ -18,9 +18,19 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    rc: { 
-      type: Number, 
-      default: 0 
+    role: {
+      type: String,
+      enum: ["Admin", "User"],
+      default: "User",
+    },
+    userAggrement: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    rc: {
+      type: Number,
+      default: 0,
     },
     userName: { type: String, required: true, unique: true },
   },

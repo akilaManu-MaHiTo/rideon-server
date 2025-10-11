@@ -1,9 +1,10 @@
+const imagekit = require("../utils/imagekit");
 const Bike = require("../models/Bike");
 
 //Create Bike by admin
 exports.createBike = async (req, res) => {
   try {
-    const { bikeModel, fuelType, distance, condition } = req.body;
+    const { bikeModel, fuelType, distance, condition, userAggrement } = req.body;
 
     const userId = req.user.id;
 
@@ -29,7 +30,9 @@ exports.createBike = async (req, res) => {
       availability: true,
       assigned: false,
       rentApproved: true,
+      rentRejected: false,
       createdBy: userId,
+      userAggrement: true
     });
     res.status(201).json(bike);
   } catch (err) {
@@ -42,33 +45,42 @@ exports.createBike = async (req, res) => {
 exports.createBikeByUser = async (req, res) => {
   try {
     const { bikeModel, fuelType, distance, condition } = req.body;
-
     const userId = req.user.id;
 
-    let prefix = "";
-    if (fuelType.toLowerCase() === "electric") {
-      prefix = "EV";
-    } else if (fuelType.toLowerCase() === "pedal") {
-      prefix = "PD";
-    } else {
-      prefix = "BK";
+    // Upload image from multer buffer
+    let uploadedImage = null;
+    if (req.file) {
+      uploadedImage = await imagekit.upload({
+        file: req.file.buffer.toString("base64"),
+        fileName: `${bikeModel}_${Date.now()}.jpg`,
+        folder: "/bikes",
+      });
     }
 
+    // Generate bike ID
+    let prefix = "";
+    if (fuelType.toLowerCase() === "electric") prefix = "EV";
+    else if (fuelType.toLowerCase() === "pedal") prefix = "PD";
+    else prefix = "BK";
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const bikeId = `${prefix}${randomNum}`;
-    const fuelTypeLower = fuelType.toLowerCase();
 
+    // Create record
     const bike = await Bike.create({
       bikeId,
       bikeModel,
-      fuelType: fuelTypeLower,
+      fuelType: fuelType.toLowerCase(),
       distance,
       condition,
+      imageUrl: uploadedImage?.url || null,
       availability: true,
       assigned: false,
       rentApproved: false,
-      createdBy: userId,
+      rentRejected: false,
+      userAggrement: false,
+      createdBy: userId,      
     });
+
     res.status(201).json(bike);
   } catch (err) {
     console.error(err);
@@ -114,6 +126,8 @@ exports.UpdateBike = async (req, res) => {
       availability,
       assigned,
       rentApproved,
+      rentRejected,
+      userAggrement
     } = req.body;
 
     let prefix = "";
@@ -137,6 +151,8 @@ exports.UpdateBike = async (req, res) => {
       availability,
       assigned,
       rentApproved,
+      rentRejected,
+      userAggrement
     });
 
     if (!updatedBike) {

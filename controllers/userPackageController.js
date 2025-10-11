@@ -1,6 +1,7 @@
 const UserPackage = require("../models/UserPackage");
 const Package = require("../models/Package");
 const User = require("../models/User");
+const { createPackageNotification } = require("../utils/notificationHelper");
 
 /**
  * @desc    Activate or renew a package and update user RC total
@@ -48,6 +49,19 @@ exports.activatePackage = async (req, res) => {
       user.rc += pkg.rc;
       await user.save();
 
+      // Create notification for package renewal/reactivation
+      try {
+        await createPackageNotification(
+          userId,
+          `Package ${message.includes('renewed') ? 'Renewed' : 'Reactivated'}`,
+          `Your ${pkg.packageName || 'package'} has been ${message.includes('renewed') ? 'renewed' : 'reactivated'} successfully. ${pkg.rc} RideOn Coins have been added to your account.`,
+          'success',
+          packageId
+        );
+      } catch (notificationError) {
+        console.error("Notification creation error:", notificationError);
+      }
+
       return res.status(200).json({
         success: true,
         message,
@@ -75,6 +89,19 @@ exports.activatePackage = async (req, res) => {
     // Add RideOn Coins
     user.rc += pkg.rc;
     await user.save();
+
+    // Create notification for new package activation
+    try {
+      await createPackageNotification(
+        userId,
+        'Package Activated',
+        `Your ${pkg.packageName || 'package'} has been activated successfully! ${pkg.rc} RideOn Coins have been added to your account. Enjoy your rides!`,
+        'success',
+        packageId
+      );
+    } catch (notificationError) {
+      console.error("Notification creation error:", notificationError);
+    }
 
     res.status(201).json({
       success: true,
