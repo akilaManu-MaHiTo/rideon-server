@@ -2,7 +2,7 @@ const { model } = require("mongoose");
 const RentBike = require("../models/RentBike");
 const User = require("../models/User");
 const Bike = require("../models/Bike");
-const MyBikeStation = require("../models/bikeStation");
+const MyBikeStation = require("../models/BikeStation");
 exports.rentBikeCreate = async (req, res) => {
   try {
     const {
