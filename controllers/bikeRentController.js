@@ -179,36 +179,40 @@ exports.tripEnd = async (req, res) => {
   try {
     const userId = req.user.id;
     console.log("User ID from request:", userId);
-    // Find active rental
     const activeRent = await RentBike.findOne({ userId, isRented: true });
     if (!activeRent) {
       return res
         .status(400)
         .json({ message: "No active rental found for this user" });
     }
-    console.log("Active Rent:", activeRent);
 
-    // Find the rented bike
     const rentBike = await Bike.findById(activeRent.bikeId);
     if (!rentBike) {
       return res.status(404).json({ message: "Bike not found" });
     }
-    console.log("Rented Bike:", rentBike);
 
-    // Update total distance ridden by this bike
     rentBike.distance += activeRent.distance;
-
-    // Calculate condition loss: 1% per 10km
     const conditionLoss = activeRent.distance / 10;
     rentBike.condition = Math.max(0, rentBike.condition - conditionLoss);
-
-    // Make the bike available again
     rentBike.availability = true;
 
-    // Save updated bike
+    if (activeRent.selectedStationId) {
+      const destinationStation = await MyBikeStation.findById(
+        activeRent.selectedStationId
+      );
+      if (destinationStation) {
+        if (!destinationStation.bikes.includes(rentBike._id)) {
+          destinationStation.bikes.push(rentBike._id);
+          destinationStation.bikeCount = destinationStation.bikes.length;
+          await destinationStation.save();
+        }
+      } else {
+        console.warn("Destination station not found for rent:", activeRent._id);
+      }
+    }
+
     await rentBike.save();
 
-    // End the rental
     activeRent.isRented = false;
     await activeRent.save();
 
@@ -222,7 +226,7 @@ exports.tripEnd = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server Error: Unable to end trip",
-      error: error.message, // 👈 Add this for debugging
+      error: error.message,
     });
   }
 };
