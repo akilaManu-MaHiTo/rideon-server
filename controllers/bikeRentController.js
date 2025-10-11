@@ -2,6 +2,7 @@ const { model } = require("mongoose");
 const RentBike = require("../models/RentBike");
 const User = require("../models/User");
 const Bike = require("../models/Bike");
+const MyBikeStation = require("../models/bikeStation");
 exports.rentBikeCreate = async (req, res) => {
   try {
     const {
@@ -15,7 +16,8 @@ exports.rentBikeCreate = async (req, res) => {
       userLatitude,
       userLongitude,
       fromLatitude,
-      fromLongitude
+      fromLongitude,
+      bikeStationId,
     } = req.body;
     const id = req.user.id;
 
@@ -61,6 +63,14 @@ exports.rentBikeCreate = async (req, res) => {
       { new: true }
     );
 
+    const bikeStation = await MyBikeStation.findByIdAndUpdate(
+      bikeStationId,
+      {
+        $pull: { bikes: bikeId },
+      },
+      { new: true }
+    );
+
     const rentBike = new RentBike({
       bikeId,
       distance,
@@ -73,7 +83,7 @@ exports.rentBikeCreate = async (req, res) => {
       userLatitude,
       userLongitude,
       fromLatitude,
-      fromLongitude
+      fromLongitude,
     });
 
     const savedRentBike = await rentBike.save();
