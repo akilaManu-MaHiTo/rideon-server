@@ -230,3 +230,23 @@ exports.tripEnd = async (req, res) => {
     });
   }
 };
+
+exports.updateUserLocation = async (req, res) => {
+  try {
+    const { userLatitude, userLongitude } = req.body;
+    const id = req.user.id;
+    const userLocation = await RentBike.findOneAndUpdate(
+      { userId: id, isRented: true },
+      {
+        userLatitude: userLatitude,
+        userLongitude: userLongitude,
+      },
+      { new: true }
+    );
+    return res.status(200).json(userLocation);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Server Error", error: error.message });
+  }
+};
