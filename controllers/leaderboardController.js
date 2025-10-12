@@ -80,6 +80,7 @@ exports.getLeaderboard = async (req, res) => {
         { $match: match },
         {
           $group: {
+            
             _id: "$userId",
             totalRCSpent: { $sum: "$rcPrice" },
           },
@@ -96,5 +97,59 @@ exports.getLeaderboard = async (req, res) => {
   } catch (error) {
     console.error("Leaderboard error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+/**
+ * @desc    Get user's rank based on total RC spent
+ * @route   GET /api/leaderboard/my-rank
+ * @access  Private (User)
+ */
+exports.getUserRank = async (req, res) => {
+  try {
+    const userId = req.user.id; 
+
+    // Aggregate total RC spent per user
+    const rankAgg = [
+      {
+        $group: {
+          _id: "$userId",
+          totalRCSpent: { $sum: "$rcPrice" },
+        },
+      },
+      { $sort: { totalRCSpent: -1 } },
+    ];
+
+    const all = await RentBike.aggregate(rankAgg);
+    const idx = all.findIndex((r) => String(r._id) === String(userId));
+
+    if (idx === -1) {
+      return res.status(200).json({
+        success: true,
+        message: "User has no rides or RC spend data yet",
+        data: {
+          userId,
+          rank: null,
+          totalRCSpent: 0,
+        },
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User rank fetched successfully",
+      data: {
+        userId,
+        rank: idx + 1,
+        totalRCSpent: all[idx].totalRCSpent,
+      },
+    });
+  } catch (err) {
+    console.error("getUserRank error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch user rank",
+      error: err.message,
+    });
   }
 };
