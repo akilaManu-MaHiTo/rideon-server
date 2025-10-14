@@ -3,7 +3,7 @@ require("dotenv").config();
 const cron = require("node-cron");
 const { distributeMonthlyRewards, cleanupOldRewards } = require("../services/rewardService");
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI, {})
   .then(() => {
     console.log("MongoDB connected");
 
