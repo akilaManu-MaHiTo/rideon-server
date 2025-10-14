@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const UserPackage = require("../models/UserPackage");
 const Package = require("../models/Package");
 const User = require("../models/User");
@@ -121,33 +122,63 @@ exports.activatePackage = async (req, res) => {
 
 
 // Get user's active packages (auto expiry check)
-exports.getActivePackages = async (req, res) => {
-  const userId = req.user.id;
-  try {
-    const now = new Date();
-    await UserPackage.deleteMany({ expiresAt: { $lt: now } }); // clean expired
 
-    const active = await UserPackage.find({ userId }).populate("packageId");
+exports.getActivePackages = async (req, res) => {
+  try {
+    // robustly get user id from token payload (support id or _id)
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User id missing from token payload. Cannot fetch active packages.",
+      });
+    }
+
+    // ensure valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user id in token payload.",
+      });
+    }
+
+    const now = new Date();
+
+    // Optional cleanup (expired packages) – you can scope to this user if preferred
+    await UserPackage.deleteMany({ expiresAt: { $lt: now } });
+
+    //  Proper ObjectId creation using 'new'
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Query only for this user's active packages
+    const active = await UserPackage.find({ userId: userObjectId }).populate("packageId");
+
     const formatted = active.map(up => ({
-      _id: up.packageId._id,
-      name: up.packageId.name,
-      price: up.packageId.price,
-      description: up.packageId.description,
-      rc: up.packageId.rc,
-      timePeriod: up.packageId.timePeriod,
-      icon: up.packageId.icon,
+      _id: up.packageId?._id ?? up._id,
+      name: up.packageId?.name ?? "",
+      price: up.packageId?.price ?? 0,
+      description: up.packageId?.description ?? "",
+      rc: up.packageId?.rc ?? 0,
+      timePeriod: up.packageId?.timePeriod ?? 0,
+      icon: up.packageId?.icon ?? "",
       activatedAt: up.activatedAt,
       expiresAt: up.expiresAt,
       daysRemaining: Math.ceil((up.expiresAt - now) / (1000 * 60 * 60 * 24))
     }));
 
-    res.status(200).json(formatted);
+    return res.status(200).json({
+      success: true,
+      data: formatted,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("getActivePackages error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
-
-
 /**
  * @desc    Get current RideOn Coin (RC) total for logged-in user
  * @route   GET /api/user-package/rc
