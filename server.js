@@ -1,5 +1,6 @@
 require("dotenv").config();
 require("./utils/scheduler");
+require("./utils/rewardCron");
 
 const express = require("express");
 const bodyParser = require('body-parser');
@@ -17,6 +18,8 @@ const userPackageRoutes = require("./routes/userPackageRoutes");
 const rentBikeRoutes = require("./routes/bikeRentRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
+const rewardRoutes = require("./routes/rewardRoutes");
+
 
 
 const cors = require("cors");
@@ -42,11 +45,12 @@ app.use('/api/packages', packageRoutes);
 app.use('/api/incident', IncidentRoutes);
 app.use('/api/accident', AccidentRoutes);
 app.use('/api/obstacle', obstacleRoutes);
-app.use("/api/package", packageRoutes);       // Admin Package management
-app.use("/api/user-package", userPackageRoutes); // User package activations
+app.use("/api/package", packageRoutes);   
+app.use("/api/user-package", userPackageRoutes); 
 app.use("/api/rent-bike", rentBikeRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/rewards", rewardRoutes);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the backend API!');
