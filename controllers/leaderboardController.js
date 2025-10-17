@@ -10,28 +10,32 @@ const User = require("../models/User");
  */
 exports.getLeaderboard = async (req, res) => {
   try {
-    const { period = "all", page = 1, limit = 20 } = req.query;
+    const { period = "all", page = 1, limit = 20, includeRankFor } = req.query;
     const pageNum = Math.max(1, parseInt(page));
     const lim = Math.max(1, Math.min(100, parseInt(limit)));
 
     const match = {};
     const now = new Date();
 
-    // Apply period filter
+    // Apply period filter with both start and end bounds
     if (period === "month") {
-      match.createdAt = { $gte: new Date(now.getFullYear(), now.getMonth(), 1) };
+      const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0);
+      match.createdAt = { $gte: start, $lt: end };
     } else if (period === "week") {
       const start = new Date(now);
       start.setDate(now.getDate() - 7);
       start.setHours(0, 0, 0, 0);
-      match.createdAt = { $gte: start };
+      const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      match.createdAt = { $gte: start, $lt: end };
     } else if (period === "day") {
       const start = new Date(now);
       start.setHours(0, 0, 0, 0);
-      match.createdAt = { $gte: start };
+      const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+      match.createdAt = { $gte: start, $lt: end };
     }
 
-    // Aggregate leaderboard
+    // Aggregate leaderboard grouped by userId
     const agg = [
       { $match: match },
       {
@@ -53,9 +57,10 @@ exports.getLeaderboard = async (req, res) => {
       { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       {
         $project: {
-          userId: "$_id",
+          _id: "$_id",
           totalRCSpent: 1,
           rides: 1,
+          userId: "$_id",
           userName: "$user.userName",
           email: "$user.email",
         },
@@ -66,9 +71,11 @@ exports.getLeaderboard = async (req, res) => {
 
     const results = await RentBike.aggregate(agg);
 
-    // ✅ Use token to include the current user's rank automatically
-    let userRank = null;
-    if (req.user && req.user.id) {
+    // Determine which user to include rank for: query param `includeRankFor` takes precedence
+    const rankTarget = includeRankFor || (req.user && req.user.id) || null;
+    let includeRankForObj = null;
+
+    if (rankTarget) {
       const rankAgg = [
         { $match: match },
         { $group: { _id: "$userId", totalRCSpent: { $sum: "$rcPrice" } } },
@@ -76,15 +83,16 @@ exports.getLeaderboard = async (req, res) => {
       ];
 
       const all = await RentBike.aggregate(rankAgg);
-      const idx = all.findIndex((r) => String(r._id) === String(req.user.id));
-      userRank = {
-        userId: req.user.id,
+      const idx = all.findIndex((r) => String(r._id) === String(rankTarget));
+
+      includeRankForObj = {
+        userId: rankTarget,
         rank: idx !== -1 ? idx + 1 : null,
         totalRCSpent: idx !== -1 ? all[idx].totalRCSpent : 0,
       };
     }
 
-    res.json({ page: pageNum, limit: lim, data: results, includeRankFor: userRank });
+    res.json({ page: pageNum, limit: lim, data: results, includeRankFor: includeRankForObj });
   } catch (error) {
     console.error("Leaderboard error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
