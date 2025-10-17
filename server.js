@@ -1,6 +1,6 @@
 require("dotenv").config();
 require("./utils/scheduler");
-require("./utils/rewardCron");
+const { initializeRewardCron } = require("./utils/rewardCron");
 
 const express = require("express");
 const bodyParser = require('body-parser');
@@ -59,7 +59,8 @@ app.get('/', (req, res) => {
 mongoose
   .connect(process.env.MONGO_URI, {})
   .then(() => {
-    console.log("MongoDB connected");
+  console.log("MongoDB connected");
+  initializeRewardCron();
     app.listen(process.env.PORT, () => {
       console.log(`Server running on port ${process.env.PORT}`);
     });

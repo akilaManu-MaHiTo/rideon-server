@@ -1,24 +1,38 @@
-const mongoose = require("mongoose");
-require("dotenv").config();
 const cron = require("node-cron");
 const { distributeMonthlyRewards, cleanupOldRewards } = require("../services/rewardService");
 
-mongoose.connect(process.env.MONGO_URI, {})
-  .then(() => {
-    console.log("MongoDB connected");
+let initialized = false;
+const scheduledTasks = [];
 
-    //  Monthly distribution: 00:01 on the 1st of each month
-    cron.schedule("1 0 1 * *", async () => {
-      console.log("Running monthly leaderboard reward distribution...");
-      const result = await distributeMonthlyRewards();
-      console.log("Reward distribution result:", result);
-    });
-// 0 1 * *
-    //  Cleanup old rewards: 01:00 on the 1st of each month
-    cron.schedule("0 1 1 * *", async () => {
-      console.log("Running reward log cleanup...");
-      await cleanupOldRewards();
-    });
+function initializeRewardCron(options = {}) {
+  if (initialized) {
+    return scheduledTasks;
+  }
 
-  })
-  .catch(err => console.error("MongoDB connection error:", err));
+  initialized = true;
+
+  const runOnStart = options.runOnStart ?? process.env.REWARD_CRON_RUN_ON_START === "true";
+
+  const monthlyDistributionTask = cron.schedule("1 0 1 * *", async () => {
+    console.log("Running monthly leaderboard reward distribution...");
+    const result = await distributeMonthlyRewards();
+    console.log("Reward distribution result:", result);
+  });
+
+  const cleanupTask = cron.schedule("0 1 1 1 *", async () => {
+    console.log("Running reward log cleanup...");
+    await cleanupOldRewards();
+  });
+
+  scheduledTasks.push(monthlyDistributionTask, cleanupTask);
+
+  if (runOnStart) {
+    // Helpful during development to verify the handlers without waiting a month.
+    monthlyDistributionTask.fireOnTick();
+    cleanupTask.fireOnTick();
+  }
+
+  return scheduledTasks;
+}
+
+module.exports = { initializeRewardCron };
