@@ -122,8 +122,8 @@ exports.activatePackage = async (req, res) => {
 
 
 // Get user's active packages (auto expiry check)
-
 exports.getActivePackages = async (req, res) => {
+
   try {
     // robustly get user id from token payload (support id or _id)
     const userId = req.user?.id || req.user?._id;
@@ -143,6 +143,7 @@ exports.getActivePackages = async (req, res) => {
     }
 
     const now = new Date();
+
 
     // Optional cleanup (expired packages) – you can scope to this user if preferred
     await UserPackage.deleteMany({ expiresAt: { $lt: now } });
@@ -179,6 +180,8 @@ exports.getActivePackages = async (req, res) => {
     });
   }
 };
+
+
 /**
  * @desc    Get current RideOn Coin (RC) total for logged-in user
  * @route   GET /api/user-package/rc
