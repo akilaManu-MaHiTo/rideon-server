@@ -177,8 +177,8 @@ exports.getAllRentedBike = async (req, res) => {
 
 exports.getAllRentedBikeHistory = async (req, res) => {
   try {
-    const rentedBikes = await RentBike.find({ isRented: false })
-
+    const userId = req.user.id;
+    const rentedBikes = await RentBike.find({ userId, isRented: false })
       .populate({
         path: "bikeId",
         populate: {
